@@ -1,3 +1,5 @@
+import { Dialect } from "sequelize/types";
+
 export interface Config {
   port: string;
   database: DatabaseInitOptions;
@@ -9,4 +11,5 @@ export interface DatabaseInitOptions {
   password: string;
   name: string;
   port: string;
+  dialect: Dialect;
 }
