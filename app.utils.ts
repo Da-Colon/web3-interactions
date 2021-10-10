@@ -10,7 +10,7 @@ export function cors(app: express.Application) {
 }
 
 export function logging(app: express.Application) {
-  app.use(morgan("combined"));
+  app.use(morgan("dev"));
 }
 
 export function encoding(app: express.Application) {

@@ -3,6 +3,7 @@ import { Dialect, Sequelize } from "sequelize/types";
 
 export interface Config {
   port: string;
+  isDev: boolean;
   database: DatabaseInitOptions;
   web3: WebOptions;
   etherscanURL: string;

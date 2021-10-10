@@ -2,8 +2,9 @@ import chalk from "chalk";
 import { Config } from "../types/app";
 require("dotenv").config();
 
-const devConfig: Config = {
+const config: Config = {
   port: "8080",
+  isDev: process.env.NODE_ENV === 'development',
   etherscanURL: "https://api.etherscan.io/api",
   coinGeckoURL: "https://api.coingecko.io/api/v3",
   infuraURL: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
@@ -27,5 +28,5 @@ const devConfig: Config = {
 };
 
 console.log(chalk.bold.blue(`[${process.env.NODE_ENV}] environment`));
-const config = devConfig;
+
 export default config;
