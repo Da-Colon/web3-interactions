@@ -6,7 +6,7 @@ import * as Router from "./router.utils"
 (async () => {
   const app = express();
   // initialize database
-  // Database.init(app);
+  Database.init(app);
 
   // initialize web3 provider
   // Web3.init(app);
@@ -16,10 +16,10 @@ import * as Router from "./router.utils"
 
   // todo :initialize redis
   // initialize cors
-  // Application.cors(app);
+  Application.cors(app);
   // initialize services
-  // Application.logging(app);
-  // Application.encoding(app);
+  Application.logging(app);
+  Application.encoding(app);
   // initialize blockchain indexer routes
   Router.init(app);
   // initialize server

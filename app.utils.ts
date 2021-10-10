@@ -6,7 +6,7 @@ import chalk from "chalk";
 import corsOptions from "cors";
 
 export function cors(app: express.Application) {
-  app.use(corsOptions);
+  app.use(corsOptions());
 }
 
 export function logging(app: express.Application) {
@@ -50,6 +50,6 @@ export async function init(app: express.Application) {
   server.listen(port);
   server.on("error", onError);
   server.on("listening", () => {
-    console.log(chalk.bold.blue(`web3-indexer`), chalk.white(`is listening on ${config.port}.`));
+    console.log(chalk.bold.white(`[web3-indexer] is listening on ${config.port}.`));
   });
 }

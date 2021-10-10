@@ -26,6 +26,6 @@ const devConfig: Config = {
   },
 };
 
-console.log(chalk.bgBlue.green(`current environment: ${process.env.NODE_ENV}`));
+console.log(chalk.bold.blue(`[${process.env.NODE_ENV}] environment`));
 const config = devConfig;
 export default config;
