@@ -97,7 +97,7 @@ export interface Token {
     id: string;
   };
   links: {
-    homepage: [];
+    homepage: string[];
     blockchain_site: [];
     official_forum_url: [];
     chat_url: [];

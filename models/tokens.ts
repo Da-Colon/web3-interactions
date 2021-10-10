@@ -36,7 +36,7 @@ export function TokenModel(sequelize: Sequelize) {
       type: DataTypes.STRING,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(1234) ,
     },
     totalSupply: {
       type: DataTypes.STRING,

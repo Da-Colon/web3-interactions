@@ -16,9 +16,9 @@ export function init(app: express.Application) {
   sequelize.authenticate().then(() => {
     console.log(chalk.greenBright(`[${dialect}] connection successful`))
     console.log(chalk.greenBright(`[${name}] connected`))
-    app.locals.database = sequelize;
     // :define modals
     modalsInit(sequelize)
+    app.locals.sequelize = sequelize;
   })
 }
   // todo :initialize migrations

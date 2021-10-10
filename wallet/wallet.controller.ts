@@ -1,6 +1,8 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
 import express from "express";
+import { Model } from "sequelize/types";
+import { fetchTokenData, saveTokenData } from "../tokens/tokens.services";
 import { Token } from "../types/app";
 import { Transaction } from "../types/responses";
 import { isAddressContract, isAddressToken } from "../web3/web3.services";
@@ -8,7 +10,7 @@ import { fetchWalletTransactions } from "./wallet.services";
 
 export async function interactions(req: express.Request, res: express.Response) {
   console.log(chalk.blue("requesting interactions..."));
-
+  const sequelize = req.app.locals.sequelize;
   const provider = req.app.locals.provider as ethers.providers.Provider;
   const walletAddress = req.params.address;
 
@@ -55,10 +57,22 @@ export async function interactions(req: express.Request, res: express.Response) 
     ),
   ];
 
-  // for each transaction check for token contract (to / from)
-  // todo filter for known address (database | redis) (possibly filter out then rejoin)
-  const InteractedTokenData = await Promise.all(
+  const knownTokenData = [];
+  // check for known address (database | redis) (possibly filter out then rejoin)
+  const checkedAddresses = await Promise.all(
     mapppedAddresses.map(async (address: string) => {
+      const tokenData: any = await fetchTokenData(sequelize, address);
+      if (!tokenData) return address;
+      console.log(chalk.white(`token: ${tokenData.contractAddress} found`));
+      knownTokenData.push(tokenData);
+      return false;
+    })
+  );
+  const unknownAddresses = checkedAddresses.filter((v: any) => v);
+
+  // for each transaction check for token contract (to / from)
+  const InteractedTokenData = await Promise.all(
+    unknownAddresses.map(async (address: string) => {
       const { isContract } = await isAddressContract(address, provider);
       if (!isContract) return false;
       const { isToken, tokenData } = await isAddressToken(address);
@@ -68,22 +82,20 @@ export async function interactions(req: express.Request, res: express.Response) 
   const tokens = InteractedTokenData.filter((v: any) => v);
 
   //! if transactions length is zero return
-  if (!tokens.length) {
+  if (!tokens.length && !knownTokenData.length) {
     console.log(chalk.red("no contract interactions with this address"));
     return res.json({ error: "no contract interactions with this address" });
   }
 
   // save token address
-  tokens.forEach((token: Token) => {
-    
-  })
+  const savedTokenData = await Promise.all(
+    tokens.map(async (token: Token) => {
+      const savedData = await saveTokenData(sequelize, token);
+      return savedData;
+    })
+  );
 
-  //?- - if known contract address (database)
-  //!- - - retreive and return known contract data (database)
-  //?- - check for Contract Addresses / etherscan
-  //?- - - check for erc20 Contract Addresses on coin gecko for token data
-  //!- - - -save new Contract into database
-  // - returns Object(recent contract interactions)
+  const tokenData = [...savedTokenData, ...knownTokenData];
 
-  return res.json({ success: "Successful" });
+  return res.json({ tokens: tokenData });
 }
