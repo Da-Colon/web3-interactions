@@ -2,6 +2,7 @@ import { Sequelize } from "sequelize";
 import express from 'express';
 import config from "./config";
 import chalk from "chalk";
+import { modalsInit } from "./models";
 
 export function init(app: express.Application) {
   const { database } = config;
@@ -16,7 +17,8 @@ export function init(app: express.Application) {
     console.log(chalk.greenBright(`[${dialect}] connection successful`))
     console.log(chalk.greenBright(`[${name}] connected`))
     app.locals.database = sequelize;
+    // :define modals
+    modalsInit(sequelize)
   })
 }
-  // todo :define modals
   // todo :initialize migrations

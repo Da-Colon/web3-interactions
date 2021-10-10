@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import { ethers } from "ethers";
 import config from "../config";
 import { Transaction, TransactionsResponse } from "../types/responses";
 
@@ -28,4 +27,6 @@ export async function fetchWalletTransactions(
   }
 }
 
-
+export async function saveToken() {
+  
+}

@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
 import express from "express";
+import { Token } from "../types/app";
 import { Transaction } from "../types/responses";
 import { isAddressContract, isAddressToken } from "../web3/web3.services";
 import { fetchWalletTransactions } from "./wallet.services";
@@ -54,7 +55,7 @@ export async function interactions(req: express.Request, res: express.Response) 
     ),
   ];
 
-  // for each transaction check for token (to / from)
+  // for each transaction check for token contract (to / from)
   // todo filter for known address (database | redis) (possibly filter out then rejoin)
   const InteractedTokenData = await Promise.all(
     mapppedAddresses.map(async (address: string) => {
@@ -64,13 +65,18 @@ export async function interactions(req: express.Request, res: express.Response) 
       if (isToken) return tokenData;
     })
   );
-  const tokenData = InteractedTokenData.filter((v: any) => v);
+  const tokens = InteractedTokenData.filter((v: any) => v);
 
   //! if transactions length is zero return
-  if (!tokenData.length) {
+  if (!tokens.length) {
     console.log(chalk.red("no contract interactions with this address"));
     return res.json({ error: "no contract interactions with this address" });
   }
+
+  // save token address
+  tokens.forEach((token: Token) => {
+    
+  })
 
   //?- - if known contract address (database)
   //!- - - retreive and return known contract data (database)
