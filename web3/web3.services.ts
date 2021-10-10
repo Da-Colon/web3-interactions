@@ -24,7 +24,7 @@ export async function isAddressToken(
     return { isToken: !!response.data, error: null, tokenData: response.data };
   } catch (err) {
     const error = err as Error;
-    console.log(chalk.red(`Address not found`), chalk.gray(error));
+    console.log(chalk.red(`Address: ${address} not found`), chalk.gray(error));
     return { error: err, isToken: false, tokenData: null };
   }
 }

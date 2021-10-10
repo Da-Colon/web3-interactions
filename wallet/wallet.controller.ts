@@ -63,7 +63,7 @@ export async function interactions(req: express.Request, res: express.Response) 
     mapppedAddresses.map(async (address: string) => {
       const tokenData: any = await fetchTokenData(sequelize, address);
       if (!tokenData) return address;
-      console.log(chalk.white(`token: ${tokenData.contractAddress} found`));
+      console.log(chalk.white(`token: ${tokenData.name} found`));
       knownTokenData.push(tokenData);
       return false;
     })
