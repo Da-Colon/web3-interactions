@@ -2,7 +2,7 @@ import express from "express";
 import * as Database from "./database.utils";
 import * as Application from "./app.utils";
 import * as Web3 from "./web3/web3.utils"
-import * as Router from "./router.utils"
+import * as Router from "./router"
 (async () => {
   const app = express();
   // initialize database
