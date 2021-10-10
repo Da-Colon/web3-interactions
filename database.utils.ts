@@ -1,18 +1,17 @@
 import { Sequelize } from "sequelize";
+import express from 'express';
 import config from "./config";
 
-export function init(): Sequelize {
+export function init(app: express.Application) {
   const { database } = config;
   const {user, password, host, port, name, dialect} = database
-  //postgres:secretsecretpassword@localhost:5432/development-web3-indexer
   const sequelize = new Sequelize(name, user, password, {
     host,
     port: Number(port),
     dialect,
     logging: false
   } )
-  return sequelize;
+  app.locals.database = sequelize;
 }
-
-// todo migration function to run after connection
-// todo define modals
+  // todo :define modals
+  // todo :initialize migrations

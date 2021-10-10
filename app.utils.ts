@@ -3,10 +3,10 @@ import morgan from "morgan";
 import http from "http";
 import config from "./config";
 import chalk from "chalk";
-import corsOptions from 'cors'
+import corsOptions from "cors";
 
 export function cors(app: express.Application) {
-  app.use(corsOptions)
+  app.use(corsOptions);
 }
 
 export function logging(app: express.Application) {
@@ -16,7 +16,6 @@ export function logging(app: express.Application) {
 export function encoding(app: express.Application) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
 }
 
 export function normalizePort(val: string) {
@@ -47,9 +46,10 @@ function onError(error: any) {
 export async function init(app: express.Application) {
   const server = http.createServer(app);
   const port = normalizePort(config.port);
+  app.set("port", port);
   server.listen(port);
-  server.on("error", onError)
+  server.on("error", onError);
   server.on("listening", () => {
-    console.log(chalk.bold.blue(`web3-indexer`), chalk.bgWhite.black(`is listening on ${config.port}.`));
-  })
+    console.log(chalk.bold.blue(`web3-indexer`), chalk.white(`is listening on ${config.port}.`));
+  });
 }

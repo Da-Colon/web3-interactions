@@ -1,18 +1,27 @@
 import express from "express";
 import * as Database from "./database.utils";
 import * as Application from "./app.utils";
-
-
+import * as Web3 from "./web3/web3.utils"
+import * as Router from "./router.utils"
 (async () => {
   const app = express();
   // initialize database
-  const database = Database.init();
+  // Database.init(app);
+
+  // initialize web3 provider
+  // Web3.init(app);
+
+  // get blockchain information
+  // Web3.fetchBlockChainData(app);
+
   // todo :initialize redis
+  // initialize cors
+  // Application.cors(app);
+  // initialize services
+  // Application.logging(app);
+  // Application.encoding(app);
+  // initialize blockchain indexer routes
+  Router.init(app);
   // initialize server
   Application.init(app);
-  // initialize cors
-  Application.cors(app);
-  // initialize services
-  Application.logging(app);
-  Application.encoding(app);
-})();
+})()

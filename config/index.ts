@@ -1,30 +1,31 @@
-import { Config } from "../types/app"
+import chalk from "chalk";
+import { Config } from "../types/app";
 require("dotenv").config();
 
 const devConfig: Config = {
-  port: '8080',
+  port: "8080",
+  etherscanURL: "https://api.etherscan.io/api",
+  coinGeckoURL: "https://api.coingecko.io/api/v3",
+  infuraURL: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
   database: {
-    host: process.env.POSTGRES_HOST || 'localhost',
-    user: process.env.POSTGRES_USER || 'postgres',
+    host: process.env.POSTGRES_HOST || "localhost",
+    user: process.env.POSTGRES_USER || "postgres",
     password: process.env.POSTGRES_PASSWORD,
-    name: process.env.POSTGRES_DB || 'development-web3-indexer',
-    port: process.env.POSTGRES_PORT || '5432',
-    dialect: 'postgres'
-  }
-}
+    name: process.env.POSTGRES_DB || "development-web3-indexer",
+    port: process.env.POSTGRES_PORT || "5432",
+    dialect: "postgres",
+  },
+  web3: {
+    chainId: "1",
+    network: "mainnet",
+    providerKeys: {
+      infuraKey: process.env.INFURA_API_KEY,
+      alchemyKey: process.env.ALCHEMY_API_KEY,
+      etherscanKey: process.env.ETHERSCAN_API_KEY,
+    },
+  },
+};
 
-const prodConfig: Config = {
-  port: process.env.PORT || '8080',
-  database: {
-    host: process.env.POSTGRES_HOST || '',
-    user: process.env.POSTGRES_USER || '',
-    password: process.env.POSTGRES_PASSWORD || '',
-    name: process.env.POSTGRES_NAME || '',
-    port: process.env.POSTGRES_PORT || '',
-    dialect: 'postgres'
-  }
-}
-
-const isDev = process.env.NODE_ENV === 'development'
-const config = isDev ? devConfig : prodConfig
-export default config
+console.log(chalk.bgBlue.green(`current environment: ${process.env.NODE_ENV}`));
+const config = devConfig;
+export default config;
