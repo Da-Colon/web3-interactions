@@ -6,7 +6,7 @@ const config: Config = {
   port: "8080",
   isDev: process.env.NODE_ENV === 'development',
   etherscanURL: "https://api.etherscan.io/api",
-  coinGeckoURL: "https://api.coingecko.io/api/v3",
+  coinGeckoURL: "https://api.coingecko.com/api/v3",
   infuraURL: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
   database: {
     host: process.env.POSTGRES_HOST || "localhost",
