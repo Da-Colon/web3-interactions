@@ -2,29 +2,32 @@ import chalk from "chalk";
 import { ethers } from "ethers";
 import express from "express";
 import { isAddressContract } from "../web3/web3.services";
+import { normalizeAddress } from "./wallet.utils";
 
 export async function interactions(req: express.Request, res: express.Response) {
   console.log(chalk.blue("requesting interactions..."));
   // const currentBlock = req.app.locals.currentBlock as number
-  // const provider = req.app.locals.provider as ethers.providers.Provider
+  const provider = req.app.locals.provider as ethers.providers.Provider;
   const walletAddress = req.params.address;
-
   // given a address (Contract or wallet address)
-  //! return (400) if no address provided
+  //! return if no address provided
   if (!walletAddress) {
     return res.json({ error: "please provide wallet address" });
   }
-  //! return (400) if not wallet address?
-  const isAddressContractResponse = await isAddressContract(walletAddress);
-  if (!!isAddressContractResponse.isContract) {
+
+  //! return if not wallet address?
+  const isAddressContractResponse = await isAddressContract(walletAddress, provider);
+  
+  if (isAddressContractResponse.isContract) {
+    console.log(chalk.red("invalid address provided, please provide wallet address"));
     return res.json({ error: "invalid address provided, please provide wallet address" });
   }
 
   if (!!isAddressContractResponse.error) {
-    return res.json({ error: isAddressContractResponse.error})
+    return res.json({ error: isAddressContractResponse.error });
   }
 
-  return res.sendStatus(200).json({ success: "Successful" });
+  return res.json({ success: "Successful" });
 
   // for each of the recent transactions
   //?- - if known contract address (database)

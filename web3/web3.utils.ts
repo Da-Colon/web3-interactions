@@ -18,7 +18,7 @@ export async function fetchBlockChainData(app: express.Application) {
     setTimeout(async () => await fetchBlockChainData(app), 10000)
     return;
   }
-  console.log(chalk.green(`current block: ${currentBlock}`))
+  console.log(chalk.magenta(`current block: ${currentBlock}`))
   app.locals.currentBlock = currentBlock
   setTimeout(async () => await fetchBlockChainData(app), 10000)
 }

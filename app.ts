@@ -9,10 +9,7 @@ import * as Router from "./router.utils"
   Database.init(app);
 
   // initialize web3 provider
-  // Web3.init(app);
-
-  // get blockchain information
-  // Web3.fetchBlockChainData(app);
+  Web3.init(app);
 
   // todo :initialize redis
   // initialize cors
