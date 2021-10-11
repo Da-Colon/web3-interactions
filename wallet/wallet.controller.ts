@@ -1,11 +1,9 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
 import express from "express";
-import { Model } from "sequelize/types";
-import { fetchTokenData, saveTokenData } from "../tokens/tokens.services";
-import { Token } from "../types/app";
-import { Transaction } from "../types/responses";
-import { isAddressContract, isAddressToken } from "../web3/web3.services";
+
+import { checkForTokenData, checkForUnknownTokenData, mapAddresses, saveTokensData } from "../utils";
+import { isAddressContract } from "../web3/web3.services";
 import { fetchWalletTransactions } from "./wallet.services";
 
 export async function interactions(req: express.Request, res: express.Response) {
@@ -33,69 +31,42 @@ export async function interactions(req: express.Request, res: express.Response) 
     return res.json({ error: isAddressContractResponse.error });
   }
 
-  // find last 100000 blocks of transactions
+  // find last 100000 transactions (quote limit)
   const fetchedTransactions = await fetchWalletTransactions(walletAddress);
 
-  //! if error fetching return
+  //! if error fetching return error
   if (fetchedTransactions.error) {
     console.log(chalk.red("error with node, please try again"));
     return res.json({ error: fetchedTransactions.error });
   }
-  //! if transactions length is zero return
+  //! if fetchtransactions length is zero return error
   if (!fetchedTransactions.transactions.length) {
     console.log(chalk.red("error with node, please try again"));
     return res.json({ error: "address has made no transactions" });
   }
 
-  const mapppedAddresses = [
-    ...new Set(
-      fetchedTransactions.transactions.map((transaction: Transaction) => {
-        if (transaction.from.toLowerCase() === walletAddress.toLowerCase()) {
-          return transaction.to;
-        } else return transaction.from;
-      })
-    ),
-  ];
+  // map fetchtransactions for interacted addresses (to / from !== walletAddress)
+  const mapppedAddresses = mapAddresses(fetchedTransactions.transactions, walletAddress);
 
   const knownTokenData = [];
-  // check for known address (database | redis) (possibly filter out then rejoin)
-  const checkedAddresses = await Promise.all(
-    mapppedAddresses.map(async (address: string) => {
-      const tokenData: any = await fetchTokenData(sequelize, address);
-      if (!tokenData) return address;
-      console.log(chalk.white(`token: ${tokenData.name} found`));
-      knownTokenData.push(tokenData);
-      return false;
-    })
-  );
-  const unknownAddresses = checkedAddresses.filter((v: any) => v);
+  // check database for known erc20 tokens already verfied
+  const checkedAddresses = await checkForTokenData(mapppedAddresses, sequelize, knownTokenData);
+  const unknownAddresses = checkedAddresses.filter((v: any) => v) as string[];
 
-  // for each transaction check for token contract (to / from)
-  const InteractedTokenData = await Promise.all(
-    unknownAddresses.map(async (address: string) => {
-      const { isContract } = await isAddressContract(address, provider);
-      if (!isContract) return false;
-      const { isToken, tokenData } = await isAddressToken(address);
-      if (isToken) return tokenData;
-    })
-  );
-  const tokens = InteractedTokenData.filter((v: any) => v);
+  // for each transaction unknown contract address for erc20 tokens (coin gecko verified)
+  const InteractedTokenData = await checkForUnknownTokenData(unknownAddresses, provider);
+  const newTokensData = InteractedTokenData.filter((v: any) => v);
 
-  //! if transactions length is zero return
-  if (!tokens.length && !knownTokenData.length) {
+  //! if no token interactions detected return error
+  if (!newTokensData.length && !knownTokenData.length) {
     console.log(chalk.red("no contract interactions with this address"));
     return res.json({ error: "no contract interactions with this address" });
   }
 
-  // save token address
-  const savedTokenData = await Promise.all(
-    tokens.map(async (token: Token) => {
-      const savedData = await saveTokenData(sequelize, token);
-      return savedData;
-    })
-  );
+  // save new tokens data to database
+  const savedTokenData = await saveTokensData(newTokensData, sequelize);
 
+  // combine token data
   const tokenData = [...savedTokenData, ...knownTokenData];
-
   return res.json({ tokens: tokenData });
 }
