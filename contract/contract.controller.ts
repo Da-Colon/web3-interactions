@@ -113,7 +113,8 @@ export async function interactions(req: express.Request, res: express.Response) 
         const tokensData = [...savedTokenData, ...knownTokenData];
         const contractData = [...savedContractsData, ...knownContracts];
         return {
-          walletAddress: {
+          account: walletAddress,
+          results: {
             numOfTokens: tokensData.length,
             numOfContracts: contractData.length,
             token: tokensData,
@@ -126,5 +127,5 @@ export async function interactions(req: express.Request, res: express.Response) 
       });
     })
   );
-  return res.json({ success: "~ 🚀 ~", result: walletsInteractions });
+  return res.json({ success: "~ 🚀 ~", numberOfAddress: walletsInteractions.length, result: walletsInteractions });
 }
