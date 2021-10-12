@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import express from "express";
 import * as WalletController from "../wallet/wallet.controller";
-import * as ContractController from "../contract/contract.controller";
+import * as ContractController from "../contracts/contract.controller";
 
 export function init(app: express.Application) {
   app.use("/", rootRouter());

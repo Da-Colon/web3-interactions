@@ -1,14 +1,5 @@
-import chalk from "chalk";
-import { Sequelize } from "sequelize/types";
-import {
-  fetchContractData,
-  fetchTokenData,
-  saveContractData,
-  saveTokenData,
-} from "../tokens/tokens.services";
 import { Token } from "../types/app";
 import { Transaction } from "../types/responses";
-import { fetchCoinGeckoTokenData } from "../web3/web3.services";
 
 export function mapAddresses(transactions: Transaction[], address: string) {
   return [
@@ -22,61 +13,20 @@ export function mapAddresses(transactions: Transaction[], address: string) {
   ];
 }
 
-export async function checkForTokenData(mapppedAddresses: string[], sequelize: Sequelize) {
-  const knownTokenData = [];
-  const knownContracts = [];
-  const checkedAddresses = await Promise.all(
-    mapppedAddresses.map(async (address: string, index: number) => {
-      const tokenData: any = await fetchTokenData(sequelize, address);
-      const contractData: any = await fetchContractData(sequelize, address);
-      if (tokenData) {
-        knownTokenData.push(tokenData);
-        console.info(chalk.white(`token: ${tokenData.symbol} found`));
-        return false;
-      }
-      if (contractData) {
-        console.info(chalk.white(`contract: ${contractData.id} found`));
-        knownContracts.push(contractData);
-        return false;
-      }
-      return address;
-    })
-  );
-  return [knownTokenData, checkedAddresses, knownContracts];
+export function sanitizeTokenData(tokenData: Token) {
+  return {
+    id: tokenData.contract_address,
+    name: tokenData.name,
+    symbol: tokenData.symbol,
+    image: tokenData.image.large || tokenData.image.small || null,
+    contractAddress: tokenData.contract_address,
+    homepageURL: tokenData.links.homepage[0] || null,
+    twitterScreenName: tokenData.links.twitter_screen_name || null,
+    telegramChannelIdentifier: tokenData.links.telegram_channel_identifier || null,
+    subRedditURL: tokenData.links.subreddit_url || null,
+    description: tokenData.description.en ? tokenData.description.en : null,
+    totalSupply: tokenData.market_data.total_supply,
+  };
 }
 
-export async function checkForUnknownTokenData(unknownAddresses: string[]) {
-  const nonERC20Contracts = [];
-  const erc20Tokens = await Promise.all(
-    unknownAddresses.map(async (address: string, index: number) => {
-      const { isToken, tokenData }: any = () =>
-        new Promise((resolve) => {
-          setTimeout(() => resolve(fetchCoinGeckoTokenData(address)), index * 1000);
-        });
-      if (isToken) {
-        return tokenData;
-      }
-      nonERC20Contracts.push(address);
-      return false;
-    })
-  );
-  return [nonERC20Contracts, erc20Tokens];
-}
 
-export async function saveTokensData(newTokensData: Token[], sequelize: Sequelize) {
-  return await Promise.all(
-    newTokensData.map(async (token: Token) => {
-      const savedData = await saveTokenData(sequelize, token);
-      return savedData;
-    })
-  );
-}
-
-export async function saveContractsData(newContractsData: string[], sequelize: Sequelize) {
-  return await Promise.all(
-    newContractsData.map(async (address: string) => {
-      const savedData = await saveContractData(sequelize, address);
-      return savedData;
-    })
-  );
-}

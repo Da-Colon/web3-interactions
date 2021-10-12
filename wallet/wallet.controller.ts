@@ -1,16 +1,12 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
 import express from "express";
-
-import {
-  checkForTokenData,
-  checkForUnknownTokenData,
-  mapAddresses,
-  saveContractsData,
-  saveTokensData,
-} from "../utils";
-import { isAddressContract } from "../web3/web3.services";
-import { fetchWalletTransactions } from "./wallet.services";
+import { mapAddresses } from "../utils";
+import ContractsServices from "../contracts/ContractServices";
+import FetchDataServices from "../services/FetchDataServices";
+import EtherScanServices, { EtherScanScope } from "../thirdPartyServices/EtherScanServices";
+import TokensServices from "../tokens/TokensServices";
+import Web3Services from "../web3/Web3Services";
 
 export async function interactions(req: express.Request, res: express.Response) {
   console.info(chalk.blue("requesting interactions..."));
@@ -25,7 +21,7 @@ export async function interactions(req: express.Request, res: express.Response) 
 
   console.info(chalk.blue("step 1 of 7"));
   // filter for contracts
-  const isAddressContractResponse = await isAddressContract(walletAddress, provider);
+  const isAddressContractResponse = await Web3Services.isAddressContract(walletAddress, provider);
 
   //! return if not wallet address?
   if (isAddressContractResponse.isContract) {
@@ -40,7 +36,11 @@ export async function interactions(req: express.Request, res: express.Response) 
 
   // find last 100000 transactions (quote limit)
   console.info(chalk.blue("step 2 of 7"));
-  const fetchedTransactions = await fetchWalletTransactions(walletAddress);
+  const fetchedTransactions = await EtherScanServices.fetchTransactions(
+    walletAddress,
+    provider,
+    EtherScanScope.LifeTime
+  );
 
   //! if error fetching return error
   if (fetchedTransactions.error) {
@@ -59,7 +59,7 @@ export async function interactions(req: express.Request, res: express.Response) 
 
   // check database for known erc20 tokens already verfied and filter known non-erc20 addresses
   console.info(chalk.blue("step 4 of 7"));
-  const [knownTokenData, unknownAddresses, knownContracts] = await checkForTokenData(
+  const [knownTokenData, unknownAddresses, knownContracts] = await FetchDataServices.checkForTokenData(
     mapppedAddresses,
     sequelize
   );
@@ -68,7 +68,7 @@ export async function interactions(req: express.Request, res: express.Response) 
 
   // for each transaction unknown contract address for erc20 tokens (coin gecko verified)
   console.info(chalk.blue("step 5 of 7"));
-  const [nonERC20Contracts, erc20Tokens] = await checkForUnknownTokenData(filteredFalse);
+  const [nonERC20Contracts, erc20Tokens] = await FetchDataServices.checkForUnknownTokenData(filteredFalse);
   const filteredErc20Tokens = erc20Tokens.filter((v: any) => v);
 
   // //! if no token interactions detected return error
@@ -79,18 +79,19 @@ export async function interactions(req: express.Request, res: express.Response) 
 
   // save new tokens data to database
   console.info(chalk.blue("step 6 of 7"));
-  const savedTokenData = await saveTokensData(filteredErc20Tokens, sequelize);
+  const savedTokenData = await TokensServices.saveTokensData(filteredErc20Tokens, sequelize);
   console.info(chalk.blue("step 7 of 7"));
-  const savedContractsData = await saveContractsData(nonERC20Contracts, sequelize);
+  const savedContractsData = await ContractsServices.saveContractsData(nonERC20Contracts, sequelize);
 
   // combine token data
   const tokensData = [...savedTokenData, ...knownTokenData];
   const contractData = [...savedContractsData, ...knownContracts];
   return res.json({
-    walletAddress: {
+    success: "~ 🚀 ~",
+    result: {
       numOfTokens: tokensData.length,
       numOfContracts: contractData.length,
-      token: tokensData,
+      tokens: tokensData,
       contracts: contractData,
     },
   });
