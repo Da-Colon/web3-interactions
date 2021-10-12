@@ -55,12 +55,13 @@ export async function interactions(req: express.Request, res: express.Response) 
   const mappedAddresses = mapAddresses(fetchedTransactions.transactions, contractAddress);
   // filter 10 unique addresses
   console.info(chalk.blue("step 3 of 10"));
+  const interactedAddresses = mappedAddresses.filter((_: string, index: number) => index <= 2);
 
   // for each address retreive token retreive contract interactions
   console.info(chalk.blue("step 4 of 10"));
 
   const walletsInteractions = await Promise.all(
-    mappedAddresses.map(async (walletAddress: string, index: number) => {
+    interactedAddresses.map(async (walletAddress: string, index: number) => {
       const getInteractions = async () => {
         const step = 0;
         // find last 100000 transactions (quote limit)
@@ -84,7 +85,10 @@ export async function interactions(req: express.Request, res: express.Response) 
 
         // check database for known erc20 tokens already verfied and filter known non-erc20 addresses
         console.info(chalk.blue(`address: ${walletAddress} ${step + 3} of 6`));
-        const [knownTokenData, unknownAddresses] = await checkForTokenData(mapppedAddresses, sequelize);
+        const [knownTokenData, unknownAddresses, knownContracts] = await checkForTokenData(
+          mapppedAddresses,
+          sequelize
+        );
         const filteredFalse = unknownAddresses.filter((v: any) => v) as string[];
         // const filteredUnknownAddresses = filteredFalse.filter((_: any, i: number) => i <= 40) as string[];
 
@@ -103,13 +107,19 @@ export async function interactions(req: express.Request, res: express.Response) 
         console.info(chalk.blue(`address: ${walletAddress} ${step + 5} of 6`));
         const savedTokenData = await saveTokensData(filteredErc20Tokens, sequelize);
         console.info(chalk.blue(`address: ${walletAddress} ${step + 6} of 6`));
-        await saveContractsData(nonERC20Contracts, sequelize);
+        const savedContractsData = await saveContractsData(nonERC20Contracts, sequelize);
 
         // combine token data
         const tokensData = [...savedTokenData, ...knownTokenData];
-        return tokensData.map((token: Token) => {
-          return { ...token, walletAddress: walletAddress };
-        });
+        const contractData = [...savedContractsData, ...knownContracts];
+        return {
+          walletAddress: {
+            numOfTokens: tokensData.length,
+            numOfContracts: contractData.length,
+            token: tokensData,
+            contracts: contractData,
+          },
+        };
       };
       return new Promise((resolve) => {
         setTimeout(() => resolve(getInteractions()), index * 3500);

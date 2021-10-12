@@ -52,14 +52,17 @@ export async function interactions(req: express.Request, res: express.Response) 
     console.info(chalk.red("error with node, please try again"));
     return res.json({ error: "address has made no transactions" });
   }
-  
+
   // map fetchtransactions for interacted addresses (to / from !== walletAddress)
   console.info(chalk.blue("step 3 of 7"));
   const mapppedAddresses = mapAddresses(fetchedTransactions.transactions, walletAddress);
 
   // check database for known erc20 tokens already verfied and filter known non-erc20 addresses
   console.info(chalk.blue("step 4 of 7"));
-  const [knownTokenData, unknownAddresses] = await checkForTokenData(mapppedAddresses, sequelize);
+  const [knownTokenData, unknownAddresses, knownContracts] = await checkForTokenData(
+    mapppedAddresses,
+    sequelize
+  );
   const filteredFalse = unknownAddresses.filter((v: any) => v) as string[];
   // const filteredUnknownAddresses = filteredFalse.filter((_: any, i: number) => i <= 40) as string[];
 
@@ -67,7 +70,6 @@ export async function interactions(req: express.Request, res: express.Response) 
   console.info(chalk.blue("step 5 of 7"));
   const [nonERC20Contracts, erc20Tokens] = await checkForUnknownTokenData(filteredFalse);
   const filteredErc20Tokens = erc20Tokens.filter((v: any) => v);
-
 
   // //! if no token interactions detected return error
   if (!filteredErc20Tokens.length && !knownTokenData.length) {
@@ -79,9 +81,17 @@ export async function interactions(req: express.Request, res: express.Response) 
   console.info(chalk.blue("step 6 of 7"));
   const savedTokenData = await saveTokensData(filteredErc20Tokens, sequelize);
   console.info(chalk.blue("step 7 of 7"));
-  await saveContractsData(nonERC20Contracts, sequelize);
+  const savedContractsData = await saveContractsData(nonERC20Contracts, sequelize);
 
   // combine token data
-  const tokenData = [...savedTokenData, ...knownTokenData];
-  return res.json({ length: tokenData.length, results: tokenData });
+  const tokensData = [...savedTokenData, ...knownTokenData];
+  const contractData = [...savedContractsData, ...knownContracts];
+  return res.json({
+    walletAddress: {
+      numOfTokens: tokensData.length,
+      numOfContracts: contractData.length,
+      token: tokensData,
+      contracts: contractData,
+    },
+  });
 }

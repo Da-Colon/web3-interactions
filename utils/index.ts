@@ -24,6 +24,7 @@ export function mapAddresses(transactions: Transaction[], address: string) {
 
 export async function checkForTokenData(mapppedAddresses: string[], sequelize: Sequelize) {
   const knownTokenData = [];
+  const knownContracts = [];
   const checkedAddresses = await Promise.all(
     mapppedAddresses.map(async (address: string, index: number) => {
       const tokenData: any = await fetchTokenData(sequelize, address);
@@ -35,12 +36,13 @@ export async function checkForTokenData(mapppedAddresses: string[], sequelize: S
       }
       if (contractData) {
         console.info(chalk.white(`contract: ${contractData.id} found`));
+        knownContracts.push(contractData);
         return false;
       }
       return address;
     })
   );
-  return [knownTokenData, checkedAddresses];
+  return [knownTokenData, checkedAddresses, knownContracts];
 }
 
 export async function checkForUnknownTokenData(unknownAddresses: string[]) {
