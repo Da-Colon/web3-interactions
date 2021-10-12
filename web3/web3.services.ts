@@ -16,6 +16,7 @@ export async function isAddressContract(
     return { error: err, isContract: false };
   }
 }
+
 export async function fetchCoinGeckoTokenData(
   address: string
 ): Promise<{ isToken: boolean; error: string | null; tokenData: any }> {
@@ -23,7 +24,10 @@ export async function fetchCoinGeckoTokenData(
     const response = await Axios.get(`${config.coinGeckoURL}/coins/ethereum/contract/${address}`);
     return { isToken: !!response.data, error: null, tokenData: response.data };
   } catch (err) {
-    const error = err as Error;
+    const error = err as string;
+    if (error === 'Request failed with status code 429') {
+      throw 'ereoreroreore'
+    }
     console.info(chalk.red(`Address: ${address} not found`), chalk.gray(error));
     return { error: err, isToken: false, tokenData: null };
   }

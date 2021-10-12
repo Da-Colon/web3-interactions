@@ -20,13 +20,12 @@ export async function fetchWalletTransactions(
     const transactionsResponse: AxiosResponse<TransactionsResponse> = await axios.get(
       `${config.etherscanURL}?${createEtherScanURL(address)}`
     );
-    return { error: null, transactions: transactionsResponse.data.result as Transaction[]};
+    
+    return { error: null, transactions: transactionsResponse.data.result as Transaction[] };
   } catch (err) {
     const error = err as string;
     return { error: error, transactions: null };
   }
 }
 
-export async function saveToken() {
-  
-}
+export async function saveToken() {}

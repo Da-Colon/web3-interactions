@@ -23,6 +23,6 @@ function rootRouter() {
 function interactionsRouter() {
   const router = express.Router()
   router.get("/wallet/:address", WalletController.interactions);
-  // router.get('/contract/:address', ContractController.interactions)
+  router.get('/contract/:address', ContractController.interactions)
   return router
 }
