@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import express from "express";
 import * as WalletController from "../wallet/wallet.controller";
+import * as ContractController from "../contract/contract.controller";
 
 export function init(app: express.Application) {
   app.use("/", rootRouter());
@@ -10,7 +11,7 @@ export function init(app: express.Application) {
 function rootRouter() {
   const router = express.Router();
   router.get("/ping", (req: express.Request, res: express.Response) => {
-    console.log(chalk.green("succesful ping"));
+    console.info(chalk.green("succesful ping"));
     return res.json({ success: "🚀 ~ Ping Successful" });
   });
   router.get("/", (req: express.Request, res: express.Response) => {
@@ -22,6 +23,6 @@ function rootRouter() {
 function interactionsRouter() {
   const router = express.Router()
   router.get("/wallet/:address", WalletController.interactions);
-  // app.get('/contract/:address', ContractController.interactions)
+  // router.get('/contract/:address', ContractController.interactions)
   return router
 }

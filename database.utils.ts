@@ -14,8 +14,8 @@ export function init(app: express.Application) {
     logging: false
   } )
   sequelize.authenticate().then(() => {
-    console.log(chalk.greenBright(`[${dialect}] connection successful`))
-    console.log(chalk.greenBright(`[${name}] connected`))
+    console.info(chalk.greenBright(`[${dialect}] connection successful`))
+    console.info(chalk.greenBright(`[${name}] connected`))
     // :define modals
     modalsInit(sequelize)
     app.locals.sequelize = sequelize;

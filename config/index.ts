@@ -20,13 +20,13 @@ const config: Config = {
     chainId: "1",
     network: "mainnet",
     providerKeys: {
-      infuraKey: process.env.INFURA_API_KEY,
-      alchemyKey: process.env.ALCHEMY_API_KEY,
-      etherscanKey: process.env.ETHERSCAN_API_KEY,
+      infura: process.env.INFURA_API_KEY,
+      alchemy: process.env.ALCHEMY_API_KEY,
+      etherscan: process.env.ETHERSCAN_API_KEY,
     },
   },
 };
 
-console.log(chalk.bold.blue(`[${process.env.NODE_ENV}] environment`));
+console.info(chalk.bold.blue(`[${process.env.NODE_ENV}] environment`));
 
 export default config;

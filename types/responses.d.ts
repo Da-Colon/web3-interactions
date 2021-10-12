@@ -12,7 +12,7 @@ interface RPCErrorResponse {
 export interface TransactionsResponse {
   status: string;
   message: string;
-  result: Transaction[];
+  result: Transaction[] | string;
   error?: RPCErrorResponse;
 }
 

@@ -7,7 +7,7 @@ function createEtherScanURL(address: string) {
     module: "account",
     action: "txlist",
     address: address,
-    apiKey: config.web3.providerKeys.etherscanKey,
+    apiKey: config.web3.providerKeys.etherscan,
   };
   const queryParams = new URLSearchParams(params);
   return queryParams;
@@ -20,7 +20,7 @@ export async function fetchWalletTransactions(
     const transactionsResponse: AxiosResponse<TransactionsResponse> = await axios.get(
       `${config.etherscanURL}?${createEtherScanURL(address)}`
     );
-    return { error: null, transactions: transactionsResponse.data.result };
+    return { error: null, transactions: transactionsResponse.data.result as Transaction[]};
   } catch (err) {
     const error = err as string;
     return { error: error, transactions: null };

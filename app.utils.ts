@@ -50,6 +50,6 @@ export async function init(app: express.Application) {
   server.listen(port);
   server.on("error", onError);
   server.on("listening", () => {
-    console.log(chalk.bold.white(`[web3-indexer] is listening on ${config.port}.`));
+    console.info(chalk.bold.white(`[web3-indexer] is listening on ${config.port}.`));
   });
 }

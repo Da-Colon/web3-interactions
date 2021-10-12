@@ -27,9 +27,9 @@ export interface WebOptions {
 }
 
 export interface ProviderKeys {
-  infuraKey: string;
-  alchemyKey: string;
-  etherscanKey: string;
+  infura: string;
+  alchemy: string;
+  etherscan: string;
 }
 
 // for reference; unless I find where to put it.
