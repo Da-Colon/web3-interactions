@@ -12,6 +12,13 @@ export async function interactions(req: express.Request, res: express.Response) 
   const provider = req.app.locals.provider as ethers.providers.Provider;
   const contractAddress = req.params.address;
   const sequelize = req.app.locals.sequelize;
+  const { numberOfAccounts } = req.query
+  let accountsLength: number
+  if(numberOfAccounts) {
+    accountsLength = Number(numberOfAccounts) > 50 ? 50 : Number(numberOfAccounts);
+  } else {
+    accountsLength = 100;
+  }
   //! return if no address provided
   if (!contractAddress || !ethers.utils.isAddress(contractAddress)) {
     return res.json({ error: "please provide wallet address" });
@@ -49,7 +56,7 @@ export async function interactions(req: express.Request, res: express.Response) 
   const mappedAddresses = mapAddresses(fetchedTransactions.transactions, contractAddress);
   // filter 10 unique addresses
   console.info(chalk.blue("step 3 of 10"));
-  const interactedAddresses = mappedAddresses.filter((_: string, index: number) => index <= 2);
+  const interactedAddresses = mappedAddresses.filter((_: string, index: number) => index <= accountsLength - 1);
 
   // for each address retreive token retreive contract interactions
   console.info(chalk.blue("step 4 of 10"));

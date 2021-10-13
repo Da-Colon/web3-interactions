@@ -1,8 +1,8 @@
 import { Sequelize } from "sequelize";
 import express from 'express';
-import config from "./config";
+import config from ".";
 import chalk from "chalk";
-import { modalsInit } from "./models";
+import { modalsInit } from "../models";
 
 export function init(app: express.Application) {
   const { database } = config;
